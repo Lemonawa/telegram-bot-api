@@ -96,7 +96,7 @@ jobs:
       - name: Build
         run: |
           cd build
-          cmake --build . --config ${{ inputs.build_type }} --parallel
+          cmake --build . --config ${{ inputs.build_type }} --parallel 2
 
       - name: Prepare artifact (Linux)
         if: matrix.os == 'linux'
