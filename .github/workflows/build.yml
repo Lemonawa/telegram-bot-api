@@ -66,6 +66,8 @@ jobs:
         if: matrix.os == 'macos'
         run: |
           brew install cmake gperf openssl@3
+          # Ensure we can find openssl
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
 
       - name: Configure CMake (Linux)
         if: matrix.os == 'linux'
@@ -84,12 +86,11 @@ jobs:
         run: |
           mkdir build
           cd build
-          export OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
           cmake \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} \
             -DCMAKE_C_COMPILER=${{ matrix.cc }} \
             -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
-            -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR} \
+            -DOPENSSL_ROOT_DIR=${{ env.OPENSSL_ROOT_DIR }} \
             -DTELEGRAM_BOT_API_ENABLE_LTO=${{ inputs.enable_lto }} \
             ..
 
