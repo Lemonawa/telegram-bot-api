@@ -9,9 +9,8 @@ This repository contains GitHub Actions workflows to build the Telegram Bot API 
 The main workflow builds the Telegram Bot API server for multiple platforms and architectures:
 
 **Supported Platforms:**
-- **Linux**: x86_64, ARM64 (cross-compiled)
-- **macOS**: x86_64 (Intel), ARM64 (Apple Silicon)
-- **Windows**: x86_64
+- **Linux**: x86_64
+- **macOS**: ARM64 (Apple Silicon)
 
 **Manual Trigger:**
 
@@ -38,10 +37,7 @@ Artifact naming convention:
 
 Available artifacts:
 - `telegram-bot-api-linux-x86_64` - Linux Intel/AMD 64-bit
-- `telegram-bot-api-linux-arm64` - Linux ARM 64-bit
-- `telegram-bot-api-macos-x86_64` - macOS Intel 64-bit
 - `telegram-bot-api-macos-arm64` - macOS Apple Silicon
-- `telegram-bot-api-windows-x86_64` - Windows 64-bit
 
 ## Build Details
 
@@ -87,16 +83,6 @@ chmod +x telegram-bot-api
 
 # Run
 ./telegram-bot-api --api-id YOUR_API_ID --api-hash YOUR_API_HASH
-```
-
-### Windows:
-
-```powershell
-# Extract the zip file
-Expand-Archive telegram-bot-api-windows-x86_64.zip -DestinationPath .
-
-# Run
-.\telegram-bot-api.exe --api-id YOUR_API_ID --api-hash YOUR_API_HASH
 ```
 
 For more information on usage, see the main [README.md](../README.md).
