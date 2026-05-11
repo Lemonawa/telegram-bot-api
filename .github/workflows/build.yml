@@ -7,6 +7,8 @@ jobs:
   build:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     strategy:
       fail-fast: false
       matrix:
@@ -19,10 +21,6 @@ jobs:
             os: ubuntu-24.04-arm
             arch: arm64
             artifact: telegram-bot-api-Linux-arm64
-          - name: macOS x64
-            os: macos-13
-            arch: x64
-            artifact: telegram-bot-api-macOS-x64
           - name: macOS arm64
             os: macos-latest
             arch: arm64
@@ -51,17 +49,12 @@ jobs:
       - name: Install macOS dependencies
         if: runner.os == 'macOS'
         run: |
-          brew install gperf cmake openssl
+          brew install --quiet gperf cmake openssl
 
       - name: Set macOS OpenSSL path
         id: openssl
         if: runner.os == 'macOS'
-        run: |
-          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
-            echo "root_dir=/opt/homebrew/opt/openssl" >> "$GITHUB_OUTPUT"
-          else
-            echo "root_dir=/usr/local/opt/openssl" >> "$GITHUB_OUTPUT"
-          fi
+        run: echo "root_dir=/opt/homebrew/opt/openssl" >> "$GITHUB_OUTPUT"
 
       # ---- Windows: vcpkg (canonical microsoft/vcpkg) ----
       - name: Install vcpkg dependencies (Windows)
