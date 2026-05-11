@@ -14,18 +14,23 @@ jobs:
           - name: Linux x64
             os: ubuntu-24.04
             arch: x64
+            artifact: telegram-bot-api-Linux-x64
           - name: Linux arm64
             os: ubuntu-24.04-arm
             arch: arm64
+            artifact: telegram-bot-api-Linux-arm64
           - name: macOS x64
             os: macos-13
             arch: x64
+            artifact: telegram-bot-api-macOS-x64
           - name: macOS arm64
             os: macos-latest
             arch: arm64
+            artifact: telegram-bot-api-macOS-arm64
           - name: Windows x64
             os: windows-2025
             arch: x64
+            artifact: telegram-bot-api-Windows-x64
 
     steps:
       - name: Checkout
@@ -126,5 +131,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: telegram-bot-api-${{ replace(matrix.name, ' ', '-') }}
+          name: ${{ matrix.artifact }}
           path: install/bin/*
