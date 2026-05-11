@@ -16,10 +16,12 @@ jobs:
           - name: Linux x64
             os: ubuntu-24.04
             arch: x64
+            cmake_url: https://github.com/Kitware/CMake/releases/download/v4.3.2/cmake-4.3.2-linux-x86_64.sh
             artifact: telegram-bot-api-Linux-x64
           - name: Linux arm64
             os: ubuntu-24.04-arm
             arch: arm64
+            cmake_url: https://github.com/Kitware/CMake/releases/download/v4.3.2/cmake-4.3.2-linux-aarch64.sh
             artifact: telegram-bot-api-Linux-arm64
           - name: macOS arm64
             os: macos-latest
@@ -36,16 +38,28 @@ jobs:
         with:
           submodules: recursive
 
-      # ---- Linux: clang-18 + libc++ (recommended by build.html for best performance) ----
-      - name: Install Linux dependencies
+      # ---- Ubuntu: latest Clang (LLVM 21) + latest CMake (4.3.2) ----
+      - name: Install LLVM 21 (clang, lld, libc++)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            make git zlib1g-dev libssl-dev gperf cmake \
-            clang-18 libc++-18-dev libc++abi-18-dev lld-18
+          wget -q https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 21
+          sudo apt-get install -y libc++-21-dev libc++abi-21-dev lld-21
 
-      # ---- macOS: brew latest ----
+      - name: Install latest CMake (4.3.2)
+        if: runner.os == 'Linux'
+        run: |
+          wget -q "${{ matrix.cmake_url }}" -O /tmp/cmake-install.sh
+          sudo sh /tmp/cmake-install.sh --skip-license --prefix=/usr/local
+          cmake --version
+
+      - name: Install remaining Linux deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y make git zlib1g-dev libssl-dev gperf
+
+      # ---- macOS: brew (always latest) ----
       - name: Install macOS dependencies
         if: runner.os == 'macOS'
         run: |
@@ -56,7 +70,7 @@ jobs:
         if: runner.os == 'macOS'
         run: echo "root_dir=/opt/homebrew/opt/openssl" >> "$GITHUB_OUTPUT"
 
-      # ---- Windows: vcpkg (canonical microsoft/vcpkg) ----
+      # ---- Windows: vcpkg (latest from microsoft/vcpkg) ----
       - name: Install vcpkg dependencies (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -66,7 +80,7 @@ jobs:
           .\bootstrap-vcpkg.bat
           .\vcpkg.exe install gperf:x64-windows openssl:x64-windows zlib:x64-windows
 
-      # ---- Linux / macOS: Release + LTO + native CPU tuning + clang ----
+      # ---- Build (Linux) ----
       - name: Configure and build (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -77,14 +91,15 @@ jobs:
           cmake \
             -DCMAKE_BUILD_TYPE=Release \
             -DTELEGRAM_BOT_API_ENABLE_LTO=ON \
-            -DCMAKE_C_COMPILER=clang-18 \
-            -DCMAKE_CXX_COMPILER=clang++-18 \
+            -DCMAKE_C_COMPILER=clang-21 \
+            -DCMAKE_CXX_COMPILER=clang++-21 \
             -DCMAKE_CXX_FLAGS="-stdlib=libc++ -march=native -mtune=native" \
             "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}" \
             ..
 
           cmake --build . --target install -j "$(nproc)"
 
+      # ---- Build (macOS) ----
       - name: Configure and build (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -102,7 +117,7 @@ jobs:
 
           cmake --build . --target install -j "$(sysctl -n hw.ncpu)"
 
-      # ---- Windows: MSVC Release + LTO ----
+      # ---- Build (Windows) ----
       - name: Configure and build (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
