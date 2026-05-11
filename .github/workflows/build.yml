@@ -39,13 +39,13 @@ jobs:
           submodules: recursive
 
       # ---- Ubuntu: latest Clang (LLVM 21) + latest CMake (4.3.2) ----
-      - name: Install LLVM 21 (clang, lld, libc++)
+      - name: Install LLVM 21 (clang + lld)
         if: runner.os == 'Linux'
         run: |
           wget -q https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
           sudo ./llvm.sh 21
-          sudo apt-get install -y libc++-21-dev libc++abi-21-dev lld-21
+          sudo apt-get install -y lld-21
 
       - name: Install latest CMake (4.3.2)
         if: runner.os == 'Linux'
@@ -93,7 +93,8 @@ jobs:
             -DTELEGRAM_BOT_API_ENABLE_LTO=ON \
             -DCMAKE_C_COMPILER=clang-21 \
             -DCMAKE_CXX_COMPILER=clang++-21 \
-            -DCMAKE_CXX_FLAGS="-stdlib=libc++ -march=native -mtune=native" \
+            -DCMAKE_CXX_FLAGS="-march=native -mtune=native" \
+            -DCMAKE_EXE_LINKER_FLAGS="-static-libstdc++ -static-libgcc" \
             "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}" \
             ..
 
