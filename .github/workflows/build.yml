@@ -134,6 +134,7 @@ jobs:
 
           cmake -A x64 `
             -DTELEGRAM_BOT_API_ENABLE_LTO=ON `
+            -DTD_ENABLE_MULTI_PROCESSOR_COMPILATION=ON `
             "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" `
             "-DCMAKE_INSTALL_PREFIX:PATH=$installPrefix" `
             ..
